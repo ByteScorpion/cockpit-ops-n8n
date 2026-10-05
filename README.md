@@ -8,10 +8,8 @@ Pas de backend, pas de base externe, pas de framework front. Les pages sont serv
 
 ### Démo en ligne
 
-| | |
-|---|---|
-| **Cockpit** (desktop) | https://akram07s.app.n8n.cloud/webhook/ops/cockpit |
-| **Application terrain** (mobile) | https://akram07s.app.n8n.cloud/webhook/ops/terrain |
+- **Cockpit** (desktop) : https://akram07s.app.n8n.cloud/webhook/ops/cockpit
+- **Application terrain** (à ouvrir sur téléphone) : https://akram07s.app.n8n.cloud/webhook/ops/terrain
 
 ![Tour du cockpit](docs/screenshots/cockpit-tour.gif)
 
@@ -116,39 +114,7 @@ S'il existe, le signalement est rattaché au ticket existant. Sinon un ticket es
 
 ## Architecture
 
-```mermaid
-flowchart LR
-    subgraph Sources["Entrepôt (10 Data Tables n8n)"]
-        T1[Ventes par jour]
-        T2[Incidents]
-        T3[Tournées]
-        T4[Stocks]
-        T5[Ventes par produit]
-        T6[Sites, parc, catalogue]
-        T7[Briefs IA, questions]
-    end
-
-    subgraph n8n["Workflows n8n"]
-        W1["Cockpit<br/>42 requêtes SQL"]
-        W2["Brief du matin<br/>cron 7 h"]
-        W3["Analyste IA<br/>texte vers SQL"]
-        W4["Signalements terrain"]
-    end
-
-    Groq["LLM Groq<br/>gpt-oss-120b / 20b"]
-
-    Sources --> W1 & W2 & W3 & W4
-    W2 & W3 & W4 <--> Groq
-    W2 --> T7
-    W3 --> T7
-    W4 --> T2
-
-    W1 -->|"GET /ops/cockpit"| Web["Cockpit web"]
-    W4 -->|"GET /ops/terrain"| Mobile["Application mobile"]
-    Web -->|"POST /ops/brief"| W2
-    Web -->|"POST /ops/analyste"| W3
-    Mobile -->|"POST /ops/signalement"| W4
-```
+![Architecture](docs/screenshots/architecture.png)
 
 Chaque ouverture du cockpit déclenche une exécution complète : lecture des tables, 42 requêtes, génération de la page. Aucun chiffre n'est écrit en dur dans le HTML.
 
